@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AATManager for HiTradeX</title>
+
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
+</head>
+
+<body>
+  <div class="py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1 class="text-center">AATManager for HiTradeX</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a href="#" class="active nav-link" id="homePage"><i class="fa fa-android"></i><b><span style="font-weight: normal;">&nbsp; Home</span></b></a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="resultPage"><i class="fa fa-history"></i><b><span style="font-weight: normal;">&nbsp; Result</span></b></a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="logPage"><i class="fa fa-window-maximize"></i><b><span style="font-weight: normal;">&nbsp; Log</span></b></a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" id="settingPage"><i class="fa fa-sliders"></i><b><span style="font-weight: normal;">&nbsp; Setting</span></b></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!--homePage-->
+    <div class="container" id="home">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-12"> </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-lg-12">
+            <div class="input-group">
+              <input disabled type="text" class="form-control" placeholder="Directory" id="selected-directory-input" value="">
+              <span class="input-group-btn">
+        <button id="select-directory-input" class="btn btn-secondary" type="button">Choose Folder...</button>
+      </span> </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="list-group">
+            <li class="list-group-item list-group-item-danger" id="listComponents"><span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp; Components.xls</li>
+            <li class="list-group-item list-group-item-danger" id="listController"><span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp; Controller.xls</li>
+            <li class="list-group-item list-group-item-danger" id="listInput"><span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp; Input.xls</li>
+            <li class="list-group-item list-group-item-danger" id="listTestData"><span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp; TestData.xls</li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3 text-center">
+          <a href="#" class="btn btn-outline-success disabled" id="buttonAuto"><i class="fa fa-fw fa-adn"></i>&nbsp;Auto &nbsp;</a>
+        </div>
+        <div class="col-md-3 text-center">
+          <a href="#" class="btn btn-outline-success disabled" id="buttonStart"><i class="fa fa-fw fa-play-circle-o"></i>&nbsp;Start &nbsp;</a>
+        </div>
+        <div class="col-md-3 text-center">
+          <div class="col-md-12 text-center">
+            <a href="#" class="btn btn-outline-danger disabled" id="buttonStop"><i class="fa fa-fw fa-stop-circle-o"></i>&nbsp;Stop &nbsp;</a>
+          </div>
+        </div>
+        <div class="col-md-3 text-center">
+          <a href="#" class="btn btn-outline-primary disabled" id="buttonDownload"><i class="fa fa-fw fa-download"></i>&nbsp;Download &nbsp;</a>
+        </div>
+      </div>
+    </div>
+    <!--ResultPage-->
+    <div class="container" id="result">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-12"> </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Date</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody id="resultTable">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+    </div>
+    <!--LogPage-->
+    <div class="container" id="log">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-12"> </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <textarea class="form-control" id="logTextarea" rows="15"></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+    </div>
+    <!--SettingPage-->
+    <div class="container" id="setting">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-12"> </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br class=""> </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-12">
+            <form class="">
+              <div class="form-group"> <label>Storage path :</label>
+                <input id="storagePath" type="text" class="form-control" placeholder="/storage/sdcard/"> </div>
+              <div class="form-group"> <label>Output directory :</label>
+                <div class="input-group">
+                  <input id="selected-directory-output" disabled type="text" class="form-control" placeholder="Directory" id="selected-directory-output"
+                    value=""> <span class="input-group-btn">
+        <button id="select-directory-output" class="btn btn-secondary" type="button">Choose Folder...</button>
+      </span> </div>
+                <div class="col-md-12">
+                  <br class=""> </div>
+                <button id="buttonSave" class="btn btn-secondary" type="button">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <br class=""> </div>
+        </div>
+      </div>
+
+    </div>
+    <script src="js/jquery-3.2.1.slim.min.js"></script>
+    <script src="js/tether.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</body>
+</body>
+
+<script>
+  // You can also require other files to run in this process
+  require('./renderer.js')
+</script>
+
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "AATManager-for-HiTradeX",
+  "version": "1.0.0",
+  "description": "AATManager for HiTradeX Espresso Test",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "repository": "https://github.com/themaxaboy/AATManager",
+  "keywords": [
+    "Electron",
+    "AATManager"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "~1.6.2"
+  },
+  "dependencies": {
+    "electron-settings": "^3.1.1"
+  },
+  "build": {
+    "appId": "themaxaboy.aatmanager",
+    "mac": {
+      "category": "themaxaboy.aatmanager.tools.test"
+    }
+  },
+  "postinstall": "electron-builder install-app-deps",
+  "nodeGypRebuild": true
+}
