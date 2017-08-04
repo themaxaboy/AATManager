@@ -6,7 +6,7 @@ const fs = require("fs")
 const shell = require('electron').shell
 const settings = require('electron-settings');
 const {
-    execFile
+    execFileSync
 } = require('child_process')
 
 const selectDirBtn = document.getElementById('select-directory-input')
@@ -169,45 +169,45 @@ function startProcess() {
         'shell rm -f /storage/emulated/0/Android/data/com.dst.hitradex/files/Output.xls',
         'shell rm -r /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots',
 
-        'push ' + inputDirectory + '//' + 'app-debug.apk /data/local/tmp/com.dst.hitradex',
-        'push ' + inputDirectory + '//' + 'app-debug-androidTest.apk /data/local/tmp/com.dst.hitradex.test',
+        'push ' + inputDirectory + '\\' + 'app-debug.apk /data/local/tmp/com.dst.hitradex',
+        'push ' + inputDirectory + '\\' + 'app-debug-androidTest.apk /data/local/tmp/com.dst.hitradex.test',
 
-        'push ' + inputDirectory + '//' + 'Components.xls ' + storagePath,
-        'push ' + inputDirectory + '//' + 'Controller.xls ' + storagePath,
-        'push ' + inputDirectory + '//' + 'Input.xls '+ storagePath,
-        'push ' + inputDirectory + '//' + 'TestData.xls '+ storagePath,
+        'push ' + inputDirectory + '\\' + 'Components.xls ' + storagePath,
+        'push ' + inputDirectory + '\\' + 'Controller.xls ' + storagePath,
+        'push ' + inputDirectory + '\\' + 'Input.xls ' + storagePath,
+        'push ' + inputDirectory + '\\' + 'TestData.xls ' + storagePath,
 
         'shell pm install -r "/data/local/tmp/com.dst.hitradex" pkg: /data/local/tmp/com.dst.hitradex',
         'shell pm install -r "/data/local/tmp/com.dst.hitradex.test" pkg: /data/local/tmp/com.dst.hitradex.test',
         'shell pm grant com.dst.hitradex android.permission.READ_EXTERNAL_STORAGE',
         'shell pm grant com.dst.hitradex android.permission.WRITE_EXTERNAL_STORAGE',
 
-        'shell am instrument -w -r   -e debug false -e class com.dst.hitradex.ui.activity.Controller com.dst.hitradex.test/android.support.test.runner.AndroidJUnitRunner'
+        'adb shell am instrument -w -r   -e debug false -e class com.dst.hitradex.ui.activity.Controller com.dst.hitradex.test/android.support.test.runner.AndroidJUnitRunner'
     ]
+    
 
     let sendError = ipc.send('open-error-dialog-start')
 
     startCommand.forEach(function (element, sendError) {
-        let child = execFile('adb', element.split(" "), (error, stdout, stderr) => {
-            if (error) {
-                sendError
-                throw error
-                return false
-            }
-            console.log(stdout)
-        })
+        try {
+            execFileSync('adb', element.split(" "))
+        } catch (error) {
+            sendError
+            return false
+        }
     })
 
-    let child = execFile('ping', ['-t', 'localhost'], (error, stdout, stderr) => {
+
+    /*let childLog = execFileSync('adb', ['-d', 'logcat'], (error, stdout, stderr) => {
         if (error) {
             throw error
         }
     })
-    child.stdout.on('data', function (data) {
+    childLog.stdout.on('data', function (data) {
         console.log(data.toString())
         document.getElementById('logTextarea').innerHTML += data
         document.getElementById('logTextarea').scrollTop = document.getElementById('logTextarea').scrollHeight;
-    })
+    })*/
 }
 
 function stopProcess() {
@@ -219,7 +219,7 @@ function stopProcess() {
     let sendError = ipc.send('open-error-dialog-stop')
 
     stopCommand.forEach(function (element, sendError) {
-        let child = execFile('adb', element.split(" "), (error, stdout, stderr) => {
+        let child = execFileSync('adb', element.split(" "), (error, stdout, stderr) => {
             if (error) {
                 sendError
                 throw error
@@ -233,26 +233,27 @@ function stopProcess() {
 function autoProcess() {
     startProcess()
     downloadProcess()
+    stopProcess()
 }
 
-function downloadProcess() {
+async function downloadProcess() {
     let downloadCommand = [
         'pull /storage/emulated/0/Android/data/com.dst.hitradex/files/Output.xls ' + outputDirectory,
         'pull /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots ' + outputDirectory
     ]
 
     let renameOutput = [
-        'Output.xls Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls'
+        outputDirectory + '\\Output.xls Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls'
     ]
 
     let renameTestScreenshots = [
-        'MOVE Test-Screenshots Test-Screenshots-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%'
+        outputDirectory + '\\Test-Screenshots Test-Screenshots-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%'
     ]
 
     let sendError = ipc.send('open-error-dialog-download')
 
-    downloadCommand.forEach(function (element, sendError) {
-        let child = execFile('adb', element.split(" "), (error, stdout, stderr) => {
+    downloadCommand.forEach(async function (element, sendError) {
+        let child = await execFileSync('adb', element.split(" "), (error, stdout, stderr) => {
             if (error) {
                 sendError
                 throw error
@@ -262,17 +263,23 @@ function downloadProcess() {
         })
     })
 
-    /*renameOutput.forEach(function (element, sendError) {
-        let child = execFile('cd',[outputDirectory])
-            child = execFile('ren', element.split(" "), (error, stdout, stderr) => {
-            if (error) {
-                sendError
-                throw error
-                return false
-            }
-            console.log(stdout)
-        })
-    })*/
+    let childRenameOutput = await execFileSync('ren', [outputDirectory + '\\Output.xls', 'Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls'], (error, stdout, stderr) => {
+        if (error) {
+            sendError
+            throw error
+            return false
+        }
+        console.log(stdout)
+    })
+
+    let childRenameTestScreenshots = await execFileSync('move', [outputDirectory + '\\Test-Screenshots', 'Test-Screenshots-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%'], (error, stdout, stderr) => {
+        if (error) {
+            sendError
+            throw error
+            return false
+        }
+        console.log(stdout)
+    })
 }
 
 function listResult(page) {
@@ -296,7 +303,7 @@ function listResult(page) {
             let tdDate = document.createElement("td")
             tr.appendChild(tdDate)
             tdDate.appendChild(document.createTextNode(
-                new String (fs.statSync(resultFolder + '//' + file).mtime).substring(0, 25)
+                new String(fs.statSync(resultFolder + '//' + file).mtime).substring(0, 25)
             ))
 
             let tdLink = document.createElement("td")
