@@ -20,10 +20,7 @@
   },
   "dependencies": {
     "child_process": "^1.0.2",
-    "electron-settings": "^3.1.1",
-    "exec-file-sync": "^2.0.2",
-    "util": "^0.10.3",
-    "util.promisify": "^1.0.0"
+    "electron-settings": "^3.1.1"
   },
   "build": {
     "appId": "themaxaboy.aatmanager",

@@ -4,9 +4,12 @@
 const ipc = require('electron').ipcRenderer
 const fs = require("fs")
 const shell = require('electron').shell
-const settings = require('electron-settings');
+const settings = require('electron-settings')
 const {
-    execFileSync
+    execFile
+} = require('child_process')
+const {
+    spawn
 } = require('child_process')
 
 const selectDirBtn = document.getElementById('select-directory-input')
@@ -24,9 +27,9 @@ const ResultPage = document.getElementById('resultPage')
 const LogPage = document.getElementById('logPage')
 const SettingPage = document.getElementById('settingPage')
 
-let storagePath = '';
-let outputDirectory = '';
-let inputDirectory = '';
+let storagePath = ''
+let outputDirectory = ''
+let inputDirectory = ''
 
 //Go to home on first time
 changePage('home')
@@ -103,12 +106,12 @@ selectSaveBtn.addEventListener('click', function (event) {
         inputDirectory: inputDirectory,
         storagePath: storagePath,
         outputDirectory: outputDirectory
-    });
+    })
 
     document.getElementById('buttonSave').innerHTML = 'Saved!'
     setTimeout(function () {
         document.getElementById('buttonSave').innerHTML = 'Save'
-    }, 1000);
+    }, 1000)
 })
 
 function loadSettingData(page) {
@@ -158,128 +161,122 @@ function changePage(page) {
             document.getElementById(element + 'Page').className = 'nav-link'
             document.getElementById(element).style.display = 'none'
         }
-    });
+    })
 }
 
 function startProcess() {
     let startCommand = [
-        'shell pm uninstall com.dst.hitradex',
-        'shell pm uninstall com.dst.hitradex.test',
+        'adb shell pm uninstall com.dst.hitradex',
+        'adb shell pm uninstall com.dst.hitradex.test',
 
-        'shell rm -f /storage/emulated/0/Android/data/com.dst.hitradex/files/Output.xls',
-        'shell rm -r /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots',
+        'adb shell rm -f /storage/emulated/0/Android/data/com.dst.hitradex/files/Output.xls',
+        'adb shell rm -r /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots',
 
-        'push ' + inputDirectory + '\\' + 'app-debug.apk /data/local/tmp/com.dst.hitradex',
-        'push ' + inputDirectory + '\\' + 'app-debug-androidTest.apk /data/local/tmp/com.dst.hitradex.test',
+        'adb push ' + inputDirectory + '\\' + 'app-debug.apk /data/local/tmp/com.dst.hitradex',
+        'adb push ' + inputDirectory + '\\' + 'app-debug-androidTest.apk /data/local/tmp/com.dst.hitradex.test',
 
-        'push ' + inputDirectory + '\\' + 'Components.xls ' + storagePath,
-        'push ' + inputDirectory + '\\' + 'Controller.xls ' + storagePath,
-        'push ' + inputDirectory + '\\' + 'Input.xls ' + storagePath,
-        'push ' + inputDirectory + '\\' + 'TestData.xls ' + storagePath,
+        'adb push ' + inputDirectory + '\\' + 'Components.xls ' + storagePath,
+        'adb push ' + inputDirectory + '\\' + 'Controller.xls ' + storagePath,
+        'adb push ' + inputDirectory + '\\' + 'Input.xls ' + storagePath,
+        'adb push ' + inputDirectory + '\\' + 'TestData.xls ' + storagePath,
 
-        'shell pm install -r "/data/local/tmp/com.dst.hitradex" pkg: /data/local/tmp/com.dst.hitradex',
-        'shell pm install -r "/data/local/tmp/com.dst.hitradex.test" pkg: /data/local/tmp/com.dst.hitradex.test',
-        'shell pm grant com.dst.hitradex android.permission.READ_EXTERNAL_STORAGE',
-        'shell pm grant com.dst.hitradex android.permission.WRITE_EXTERNAL_STORAGE',
+        'adb shell pm install -r "/data/local/tmp/com.dst.hitradex" pkg: /data/local/tmp/com.dst.hitradex',
+        'adb shell pm install -r "/data/local/tmp/com.dst.hitradex.test" pkg: /data/local/tmp/com.dst.hitradex.test',
+        /*'adb shell pm grant com.dst.hitradex android.permission.READ_EXTERNAL_STORAGE',
+        'adb shell pm grant com.dst.hitradex android.permission.WRITE_EXTERNAL_STORAGE',*/
 
-        'adb shell am instrument -w -r   -e debug false -e class com.dst.hitradex.ui.activity.Controller com.dst.hitradex.test/android.support.test.runner.AndroidJUnitRunner'
+        'adb shell am instrument -w -r   -e debug false -e class com.dst.hitradex.ui.activity.Controller com.dst.hitradex.test/android.support.test.runner.AndroidJUnitRunner',
+        'adb -d logcat'
     ]
-    
 
-    let sendError = ipc.send('open-error-dialog-start')
+    fs.writeFile(inputDirectory + '/startProcess.bat', startCommand.join('\r\n'), (err) => {
+        if (err) throw err
+        else {
+            const bat = spawn('cmd.exe', ['/c', inputDirectory + '/startProcess.bat'])
 
-    startCommand.forEach(function (element, sendError) {
-        try {
-            execFileSync('adb', element.split(" "))
-        } catch (error) {
-            sendError
-            return false
+            bat.stdout.on('data', (data) => {
+                console.log(data.toString())
+                document.getElementById('logTextarea').innerHTML += data
+                document.getElementById('logTextarea').scrollTop = document.getElementById('logTextarea').scrollHeight
+            })
+
+            bat.stderr.on('data', (data) => {
+                console.log(data.toString())
+                ipc.send('open-error-dialog-start')
+            })
+
+            bat.on('exit', (code) => {
+                console.log(`Child exited with code ${code}`)
+            })
         }
     })
-
-
-    /*let childLog = execFileSync('adb', ['-d', 'logcat'], (error, stdout, stderr) => {
-        if (error) {
-            throw error
-        }
-    })
-    childLog.stdout.on('data', function (data) {
-        console.log(data.toString())
-        document.getElementById('logTextarea').innerHTML += data
-        document.getElementById('logTextarea').scrollTop = document.getElementById('logTextarea').scrollHeight;
-    })*/
 }
 
 function stopProcess() {
     let stopCommand = [
-        'shell am force-stop com.dst.hitradex',
-        'shell am force-stop com.dst.hitradex.test'
+        'adb shell am force-stop com.dst.hitradex',
+        'adb shell am force-stop com.dst.hitradex.test'
     ]
 
-    let sendError = ipc.send('open-error-dialog-stop')
+    fs.writeFile(inputDirectory + '/stopProcess.bat', stopCommand.join('\r\n'), (err) => {
+        if (err) throw err
+        else {
+            const bat = spawn('cmd.exe', ['/c', inputDirectory + '/stopProcess.bat'])
 
-    stopCommand.forEach(function (element, sendError) {
-        let child = execFileSync('adb', element.split(" "), (error, stdout, stderr) => {
-            if (error) {
-                sendError
-                throw error
-                return false
-            }
-            console.log(stdout)
-        })
+            bat.stdout.on('data', (data) => {
+                console.log(data.toString())
+                document.getElementById('logTextarea').innerHTML += data
+                document.getElementById('logTextarea').scrollTop = document.getElementById('logTextarea').scrollHeight
+            })
+
+            bat.stderr.on('data', (data) => {
+                console.log(data.toString())
+                ipc.send('open-error-dialog-stop')
+            })
+
+            bat.on('exit', (code) => {
+                console.log(`Child exited with code ${code}`)
+            })
+        }
     })
 }
 
 function autoProcess() {
     startProcess()
-    downloadProcess()
     stopProcess()
+    downloadProcess()
 }
 
-async function downloadProcess() {
+function downloadProcess() {
     let downloadCommand = [
         'pull /storage/emulated/0/Android/data/com.dst.hitradex/files/Output.xls ' + outputDirectory,
-        'pull /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots ' + outputDirectory
-    ]
-
-    let renameOutput = [
-        outputDirectory + '\\Output.xls Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls'
-    ]
-
-    let renameTestScreenshots = [
+        'pull /storage/emulated/0/Android/data/com.dst.hitradex/files/Test-Screenshots ' + outputDirectory,
+        outputDirectory + '\\Output.xls Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls',
         outputDirectory + '\\Test-Screenshots Test-Screenshots-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%'
     ]
 
-    let sendError = ipc.send('open-error-dialog-download')
+    fs.writeFile(inputDirectory + '/downloadProcess.bat', downloadCommand.join('\r\n'), (err) => {
+        if (err) throw err
+        else {
+            const bat = spawn('cmd.exe', ['/c', inputDirectory + '/downloadProcess.bat'])
 
-    downloadCommand.forEach(async function (element, sendError) {
-        let child = await execFileSync('adb', element.split(" "), (error, stdout, stderr) => {
-            if (error) {
-                sendError
-                throw error
-                return false
-            }
-            console.log(stdout)
-        })
-    })
+            bat.stdout.on('data', (data) => {
+                console.log(data.toString())
+                document.getElementById('logTextarea').innerHTML += data
+                document.getElementById('logTextarea').scrollTop = document.getElementById('logTextarea').scrollHeight
+            })
 
-    let childRenameOutput = await execFileSync('ren', [outputDirectory + '\\Output.xls', 'Output-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%.xls'], (error, stdout, stderr) => {
-        if (error) {
-            sendError
-            throw error
-            return false
+            bat.stderr.on('data', (data) => {
+                console.log(data.toString())
+                ipc.send('open-error-dialog-download')
+            })
+
+            bat.on('exit', (code) => {
+                console.log(`Child exited with code ${code}`)
+            })
         }
-        console.log(stdout)
     })
 
-    let childRenameTestScreenshots = await execFileSync('move', [outputDirectory + '\\Test-Screenshots', 'Test-Screenshots-%date:~10,4%%date:~7,2%%date:~4,2%-%time:~0,2%%time:~3,2%%time:~6,2%'], (error, stdout, stderr) => {
-        if (error) {
-            sendError
-            throw error
-            return false
-        }
-        console.log(stdout)
-    })
 }
 
 function listResult(page) {
@@ -344,7 +341,7 @@ function loadFileState() {
             if (err == null) {
                 console.log('File exists')
                 document.getElementById('list' + element).className = `list-group-item list-group-item-success`
-                document.getElementById('list' + element).innerHTML = '<span class="badge badge-default bg-success"><i class="fa fa-fw fa-check-circle"></i></span>&nbsp; ' + element + '.xls'
+                document.getElementById('list' + element).innerHTML = '<span class="badge badge-default bg-success"><i class="fa fa-fw fa-check-circle"></i></span>&nbsp ' + element + '.xls'
                 allFileState++
                 if (allFileState == 4) {
                     document.getElementById('buttonAuto').className = 'btn btn-outline-success'
@@ -352,10 +349,10 @@ function loadFileState() {
                 }
             } else if (err.code == 'ENOENT') {
                 // file does not exist
-                //fs.writeFile('log.txt', 'Some log\n');
+                //fs.writeFile('log.txt', 'Some log\n')
                 console.log('File does not exist')
                 document.getElementById('list' + element).className = `list-group-item list-group-item-danger`
-                document.getElementById('list' + element).innerHTML = '<span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp; ' + element + '.xls'
+                document.getElementById('list' + element).innerHTML = '<span class="badge badge-default bg-danger"><i class="fa fa-fw fa-times-circle"></i></span>&nbsp ' + element + '.xls'
                 document.getElementById('buttonAuto').className = 'btn btn-outline-success disabled'
                 document.getElementById('buttonStart').className = 'btn btn-outline-success disabled'
                 allFileState--
