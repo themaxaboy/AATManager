@@ -6,9 +6,6 @@ const fs = require("fs")
 const shell = require('electron').shell
 const settings = require('electron-settings')
 const {
-    execFile
-} = require('child_process')
-const {
     spawn
 } = require('child_process')
 
@@ -202,6 +199,7 @@ function startProcess() {
 
             bat.stderr.on('data', (data) => {
                 console.log(data.toString())
+                bat.kill()
                 ipc.send('open-error-dialog-start')
             })
 
@@ -231,6 +229,7 @@ function stopProcess() {
 
             bat.stderr.on('data', (data) => {
                 console.log(data.toString())
+                bat.kill()
                 ipc.send('open-error-dialog-stop')
             })
 
@@ -268,6 +267,7 @@ function downloadProcess() {
 
             bat.stderr.on('data', (data) => {
                 console.log(data.toString())
+                bat.kill()
                 ipc.send('open-error-dialog-download')
             })
 
