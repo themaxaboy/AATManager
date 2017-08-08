@@ -163,8 +163,8 @@ function changePage(page) {
 function startProcess() {
     return new Promise(function (resolve, reject) {
         let startCommand = [
-            /*'adb shell pm uninstall com.dst.hitradex',
-            'adb shell pm uninstall com.dst.hitradex.test',*/
+            'adb shell pm uninstall com.dst.hitradex',
+            'adb shell pm uninstall com.dst.hitradex.test',
             'adb push ' + inputDirectory + '\\' + 'app-debug.apk /data/local/tmp/com.dst.hitradex',
             'adb push ' + inputDirectory + '\\' + 'app-debug-androidTest.apk /data/local/tmp/com.dst.hitradex.test',
 
