@@ -175,8 +175,8 @@ function startProcess() {
 
             'adb shell pm install -r "/data/local/tmp/com.dst.hitradex" pkg: /data/local/tmp/com.dst.hitradex',
             'adb shell pm install -r "/data/local/tmp/com.dst.hitradex.test" pkg: /data/local/tmp/com.dst.hitradex.test',
-            /*'adb shell pm grant com.dst.hitradex android.permission.READ_EXTERNAL_STORAGE',
-            'adb shell pm grant com.dst.hitradex android.permission.WRITE_EXTERNAL_STORAGE',*/
+            'adb shell pm grant com.dst.hitradex android.permission.READ_EXTERNAL_STORAGE',
+            'adb shell pm grant com.dst.hitradex android.permission.WRITE_EXTERNAL_STORAGE',
 
             'adb shell am instrument -w -r   -e debug false -e class com.dst.hitradex.ui.activity.Controller com.dst.hitradex.test/android.support.test.runner.AndroidJUnitRunner'
         ]

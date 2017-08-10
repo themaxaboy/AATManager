@@ -94,6 +94,18 @@ ipc.on('open-error-dialog-download', function (event) {
   dialog.showErrorBox('Download Error Message', 'Oops! Something went wrong.')
 })
 
+ipc.on('open-information-dialog', function (event) {
+  const options = {
+    type: 'info',
+    title: 'Information',
+    message: "Process completed.",
+    buttons: ['OK']
+  }
+  dialog.showMessageBox(options, function (index) {
+    event.sender.send('information-dialog-selection', index)
+  })
+})
+
 let template = [{
   label: 'Edit',
   submenu: [{
